@@ -3,9 +3,17 @@
 /* eslint-disable no-console */
 const execa = require('execa');
 const replace = require('replace-in-file');
+const octokit = require('@octokit/rest')();
 const NetlifyAPI = require('netlify');
 
 const client = new NetlifyAPI(process.env.NETLIFY_API_KEY);
+
+if (process.env.GITHUB_TOKEN) {
+  octokit.authenticate({
+    type: 'token',
+    token: process.env.GITHUB_TOKEN
+  });
+}
 
 function logStdOut(opts) {
   console.log(opts.stdout);
@@ -61,15 +69,22 @@ execa('yarn', ['build'])
       message: process.env.TRAVIS_COMMIT_MESSAGE || ''
     })
   )
-  .then(({deploy: {id, name, deploy_ssl_url: url}}) =>
-    console.log(
-      '🕸　site is available at ' +
-        url +
-        '\n\n' +
-        'Deploy details available at https://app.netlify.com/sites/' +
-        name +
-        '/deploys/' +
-        id
-    )
+  .then(
+    ({
+      deploy: {id, name, deploy_ssl_url: url}
+    }) => `🕸 site is available at ${url}
+
+Deploy details available at https://app.netlify.com/sites/${name}/deploys/${id}`
+  )
+  .then(
+    message =>
+      process.env.TRAVIS_PULL_REQUEST ?
+        octokit.issues.createComment({
+          owner: 'algolia',
+          repo: 'autocomplete.js',
+          number: process.env.TRAVIS_PULL_REQUEST,
+          body: message
+        })
+        : console.log(message)
   );
 
