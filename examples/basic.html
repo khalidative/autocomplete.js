@@ -37,7 +37,7 @@
         <div class="col-sm-6 col-sm-offset-3">
           <form action="#" class="form">
             <h3>Basic example</h3>
-            <input class="form-control" id="search-input" name="contacts" type="text" placeholder='Search by name' />
+            <input class="form-control" id="search-input" name="contacts" type="text" placeholder='Search our content' />
           </form>
         </div>
       </div>
@@ -46,22 +46,23 @@
     <script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
     <script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.min.js"></script>
     <script>
-      var client = algoliasearch('latency', '6be0576ff61c053d5f9a3225e2a90f76');
-      var index = client.initIndex('contacts');
+      var client = algoliasearch('9LQPDPETI5', '8af0f565e12dbb883d5c5b8eb6ed1a2a');
+      var index = client.initIndex('blog_NAME');
       autocomplete('#search-input', { hint: false }, [
         {
-          source: autocomplete.sources.hits(index, { hitsPerPage: 5 }),
+          source: autocomplete.sources.hits(index, { hitsPerPage: 10 }),
           displayKey: 'name',
           templates: {
             suggestion: function(suggestion) {
-              return suggestion._highlightResult.name.value;
+              return suggestion._highlightResult.post_title.value;
             }
           }
         }
-      ]).on('autocomplete:selected', function(event, suggestion, dataset) {
-        console.log(suggestion, dataset);
-        alert('dataset: ' + dataset + ', ' + suggestion.name);
-      });
+      ]).on('autocomplete:selected', function(event, suggestion, dataset, context) {
+  
+  // Change the page, for example, on other events
+  window.location.assign(suggestion.url);
+});
     </script>
   </body>
 </html>
